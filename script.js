@@ -4,7 +4,37 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const modernNav = document.getElementById('modernNav');
     const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('.section, .hero-section');
+    const sections = document.q    // Mechanical keyboard key interaction
+    const keyboardKeys = document.querySelectorAll('.keyboard-key');
+    const keySound = new Audio('keyboard-sound.wav'); // Path to sound file
+
+    keyboardKeys.forEach(key => {
+        key.addEventListener('mouseenter', function() {
+            const keyCap = this.querySelector('.key-cap');
+            keyCap.style.animationPlayState = 'paused';
+            keyCap.style.transform = 'translateY(-4px)';
+        });
+        
+        key.addEventListener('mouseleave', function() {
+            const keyCap = this.querySelector('.key-cap');
+            keyCap.style.animationPlayState = 'running';
+            keyCap.style.transform = 'translateY(0)';
+        });
+        
+        key.addEventListener('click', function() {
+            const keyCap = this.querySelector('.key-cap');
+            keyCap.style.animation = 'keyPress 0.2s ease';
+            setTimeout(() => {
+                keyCap.style.animation = '';
+            }, 200);
+
+            // Play keyboard sound effect
+            keySound.currentTime = 0; // Reset sound to start
+            keySound.play();
+        });
+    });
+
+    // ...existing code...('.section, .hero-section');
 
     // Smooth scrolling for navigation links
     navLinks.forEach(link => {
@@ -297,6 +327,41 @@ document.addEventListener('DOMContentLoaded', function() {
             floatDirection *= -1;
             profileBadge.style.transform = `translateY(${floatDirection * 3}px)`;
         }, 2000);
+    }
+
+    // Hero cube interaction
+    const cubes = document.querySelectorAll('.cube');
+    cubes.forEach(cube => {
+        cube.addEventListener('mouseenter', function() {
+            this.style.animationPlayState = 'paused';
+            this.style.transform = 'translateY(-15px) rotateX(45deg) rotateY(45deg) scale(1.1)';
+        });
+        
+        cube.addEventListener('mouseleave', function() {
+            this.style.animationPlayState = 'running';
+            this.style.transform = '';
+        });
+    });
+
+    // Learn more button functionality
+    const learnMoreBtn = document.querySelector('.learn-more-btn');
+    if (learnMoreBtn) {
+        learnMoreBtn.addEventListener('click', function() {
+            // Scroll to about section or show more info
+            const aboutSection = document.getElementById('about');
+            if (aboutSection) {
+                aboutSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+
+    // Menu toggle functionality
+    const menuToggle = document.querySelector('.menu-toggle');
+    if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+            // Add menu functionality here if needed
+        });
     }
 
     // Handle resize events
