@@ -3,46 +3,51 @@
 import { Button } from "@/components/ui/button"
 import { Menu, Mail, Github, Home, User, Briefcase, MessageCircle, Moon, Sun, Code, Palette, Zap, Search } from "lucide-react"
 import { Outfit } from "next/font/google"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 const outfit = Outfit({ subsets: ["latin"] })
 
 export default function Portfolio() {
   const [darkMode, setDarkMode] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [cursorTrails, setCursorTrails] = useState<Array<{ x: number; y: number; id: number; velocity: { x: number; y: number } }>>([])
+  const [cursorTrails, setCursorTrails] = useState<Array<{ x: number; y: number; id: number }>>([])
+  const [scrollProgress, setScrollProgress] = useState(0)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight
+      const progress = Math.min(scrollTop / Math.max(docHeight * 0.8, 1), 1) // Complete over 80% of scroll
+      setScrollProgress(progress)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition(prev => {
-        const velocity = {
-          x: (e.clientX - prev.x) * 0.05,
-          y: (e.clientY - prev.y) * 0.05
+      const newPosition = { x: e.clientX, y: e.clientY }
+      setMousePosition(newPosition)
+      
+      // Simple trail - add point every 10px movement
+      const distance = Math.sqrt(
+        Math.pow(e.clientX - mousePosition.x, 2) + Math.pow(e.clientY - mousePosition.y, 2)
+      )
+      
+      if (distance > 10) {
+        const newTrail = { 
+          x: e.clientX, 
+          y: e.clientY, 
+          id: Date.now()
         }
-        
-        // Add new trail point with smoother spacing
-        const distance = Math.sqrt(
-          Math.pow(e.clientX - prev.x, 2) + Math.pow(e.clientY - prev.y, 2)
-        )
-        
-        // Only add new trail point if mouse moved enough distance for smoother trail
-        if (distance > 15) {
-          const newTrail = { 
-            x: e.clientX, 
-            y: e.clientY, 
-            id: Date.now() + Math.random(),
-            velocity
-          }
-          setCursorTrails(prev => [...prev.slice(-6), newTrail]) // Reduced to 7 points for cleaner look
-        }
-        
-        return { x: e.clientX, y: e.clientY }
-      })
+        setCursorTrails(prev => [...prev.slice(-5), newTrail])
+      }
     }
 
     window.addEventListener("mousemove", handleMouseMove)
     return () => window.removeEventListener("mousemove", handleMouseMove)
-  }, [])
+  }, [mousePosition.x, mousePosition.y])
 
   useEffect(() => {
     // Check for saved theme preference or default to light mode
@@ -67,42 +72,46 @@ export default function Portfolio() {
   }
 
   return (
-    <div className={`min-h-screen bg-gray-50 dark:bg-zinc-900 transition-colors duration-300 ${outfit.className}`}>
-      {/* Smooth Liquid Orange Cursor Trail */}
+    <div className={`min-h-screen w-screen max-w-full overflow-x-hidden bg-gray-50 dark:bg-zinc-900 transition-colors duration-300 ${outfit.className}`} style={{
+      zoom: 1,
+      transform: 'scale(1)',
+      transformOrigin: 'top left',
+      width: '100vw',
+      minWidth: '100vw',
+      maxWidth: '100vw'
+    }}>
+      {/* Simple Smooth Orange Cursor Trail */}
       <svg
         className="fixed pointer-events-none z-50 w-full h-full top-0 left-0"
         style={{ overflow: 'visible' }}
       >
         <defs>
           <filter id="gooey" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
-            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 15 -8" result="goo" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 12 -6" result="goo" />
             <feComposite in="SourceGraphic" in2="goo" operator="atop" />
           </filter>
           <radialGradient id="orangeGradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(249, 115, 22, 0.95)" />
-            <stop offset="60%" stopColor="rgba(234, 88, 12, 0.7)" />
+            <stop offset="0%" stopColor="rgba(249, 115, 22, 1)" />
+            <stop offset="80%" stopColor="rgba(234, 88, 12, 0.6)" />
             <stop offset="100%" stopColor="rgba(249, 115, 22, 0)" />
           </radialGradient>
         </defs>
         
         <g filter="url(#gooey)">
-          {/* Main cursor blob with smooth scaling */}
+          {/* Main cursor */}
           <circle
             cx={mousePosition.x}
             cy={mousePosition.y}
-            r="10"
+            r="8"
             fill="url(#orangeGradient)"
-            style={{
-              transition: 'all 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            }}
           />
           
-          {/* Cleaner trail blobs */}
+          {/* Simple trail */}
           {cursorTrails.map((trail, index) => {
             const progress = (index + 1) / cursorTrails.length
-            const size = 6 + progress * 6
-            const opacity = Math.pow(progress, 1.5) * 0.9
+            const size = 4 + progress * 4
+            const opacity = progress * 0.7
             
             return (
               <circle
@@ -112,9 +121,6 @@ export default function Portfolio() {
                 r={size}
                 fill="url(#orangeGradient)"
                 opacity={opacity}
-                style={{
-                  transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                }}
               />
             )
           })}
@@ -129,17 +135,126 @@ export default function Portfolio() {
         <div className="shape shape-hexagon" />
       </div>
 
-      {/* Subtle Background Quote Effect */}
+      {/* Enhanced Cinematic Scroll-Timeline Name Animation */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-0 right-0 text-center animate-scroll-up opacity-[0.03] dark:opacity-[0.05]">
-          <p className="text-8xl md:text-9xl lg:text-[12rem] font-bold text-zinc-900 dark:text-white whitespace-nowrap transform rotate-[-5deg] select-none">
-            INNOVATE • CREATE • INSPIRE • DEVELOP • DESIGN • BUILD • DREAM • ACHIEVE •
-          </p>
-        </div>
-        <div className="absolute top-3/4 left-0 right-0 text-center animate-scroll-down opacity-[0.03] dark:opacity-[0.05]">
-          <p className="text-8xl md:text-9xl lg:text-[12rem] font-bold text-zinc-900 dark:text-white whitespace-nowrap transform rotate-[3deg] select-none">
-            • PASSION • PRECISION • PROGRESS • PERFORMANCE • PERFECTION • PURPOSE •
-          </p>
+        <div className="absolute top-1/2 left-0 right-0 text-center transform -translate-y-1/2">
+          <div className="relative w-full h-48">
+            {/* AMAN - Enhanced Timeline Animation */}
+            <p 
+              className="absolute top-0 left-0 right-0 text-7xl md:text-8xl lg:text-9xl font-bold text-orange-500/30 dark:text-orange-400/40 whitespace-nowrap select-none"
+              style={{
+                transform: (() => {
+                  if (scrollProgress <= 0.25) {
+                    // Phase 1: Dramatic slide in from right with momentum (0-25%)
+                    const phaseProgress = scrollProgress / 0.25
+                    const easeOut = 1 - Math.pow(1 - phaseProgress, 3) // Cubic ease-out
+                    return `translateX(${120 - (easeOut * 120)}vw) translateY(0px) scale(${0.7 + easeOut * 0.3}) rotateZ(${15 - easeOut * 15}deg)`
+                  } else if (scrollProgress <= 0.5) {
+                    // Phase 2: Magnetic pull to center with slight bounce (25-50%)
+                    const phaseProgress = (scrollProgress - 0.25) / 0.25
+                    const elasticEase = phaseProgress < 0.5 
+                      ? 2 * phaseProgress * phaseProgress 
+                      : 1 - Math.pow(-2 * phaseProgress + 2, 2) / 2
+                    return `translateX(${0 + Math.sin(elasticEase * Math.PI) * -5}vw) translateY(${-15 + elasticEase * 15}px) scale(${1 + Math.sin(elasticEase * Math.PI) * 0.05}) rotateZ(0deg)`
+                  } else if (scrollProgress <= 0.75) {
+                    // Phase 3: Perfect alignment with subtle pulse (50-75%)
+                    const phaseProgress = (scrollProgress - 0.5) / 0.25
+                    const pulse = Math.sin(phaseProgress * Math.PI * 4) * 0.02
+                    return `translateX(0vw) translateY(0px) scale(${1 + pulse}) rotateZ(0deg)`
+                  } else {
+                    // Phase 4: Dramatic exit with spin and fade (75-100%)
+                    const phaseProgress = (scrollProgress - 0.75) / 0.25
+                    const accelerate = Math.pow(phaseProgress, 2)
+                    return `translateX(${-40 * accelerate}vw) translateY(${-60 * accelerate}px) scale(${1 - accelerate * 0.5}) rotateZ(${-45 * accelerate}deg)`
+                  }
+                })(),
+                opacity: (() => {
+                  if (scrollProgress <= 0.05) return 0
+                  if (scrollProgress <= 0.25) return (scrollProgress - 0.05) / 0.2
+                  if (scrollProgress <= 0.75) return 1
+                  return Math.max(1 - ((scrollProgress - 0.75) / 0.25) * 2, 0)
+                })(),
+                filter: (() => {
+                  if (scrollProgress > 0.4 && scrollProgress < 0.6) {
+                    const glowIntensity = Math.sin((scrollProgress - 0.4) / 0.2 * Math.PI)
+                    return `drop-shadow(0 0 ${glowIntensity * 20}px rgba(249, 115, 22, 0.5)) brightness(${1 + glowIntensity * 0.2})`
+                  }
+                  return 'none'
+                })(),
+                transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                textShadow: scrollProgress > 0.4 && scrollProgress < 0.6 
+                  ? `0 0 30px rgba(249, 115, 22, ${Math.sin((scrollProgress - 0.4) / 0.2 * Math.PI) * 0.6})` 
+                  : 'none'
+              }}
+            >
+              AMAN
+            </p>
+            
+            {/* BANGERA - Enhanced Timeline Animation */}
+            <p 
+              className="absolute top-16 left-0 right-0 text-7xl md:text-8xl lg:text-9xl font-bold text-orange-500/30 dark:text-orange-400/40 whitespace-nowrap select-none"
+              style={{
+                transform: (() => {
+                  if (scrollProgress <= 0.25) {
+                    // Phase 1: Dramatic slide in from left with momentum (0-25%)
+                    const phaseProgress = scrollProgress / 0.25
+                    const easeOut = 1 - Math.pow(1 - phaseProgress, 3) // Cubic ease-out
+                    return `translateX(${-120 + (easeOut * 120)}vw) translateY(0px) scale(${0.7 + easeOut * 0.3}) rotateZ(${-15 + easeOut * 15}deg)`
+                  } else if (scrollProgress <= 0.5) {
+                    // Phase 2: Magnetic pull to center with slight bounce (25-50%)
+                    const phaseProgress = (scrollProgress - 0.25) / 0.25
+                    const elasticEase = phaseProgress < 0.5 
+                      ? 2 * phaseProgress * phaseProgress 
+                      : 1 - Math.pow(-2 * phaseProgress + 2, 2) / 2
+                    return `translateX(${0 + Math.sin(elasticEase * Math.PI) * 5}vw) translateY(${15 - elasticEase * 15}px) scale(${1 + Math.sin(elasticEase * Math.PI) * 0.05}) rotateZ(0deg)`
+                  } else if (scrollProgress <= 0.75) {
+                    // Phase 3: Perfect alignment with subtle pulse (50-75%)
+                    const phaseProgress = (scrollProgress - 0.5) / 0.25
+                    const pulse = Math.sin(phaseProgress * Math.PI * 4) * 0.02
+                    return `translateX(0vw) translateY(0px) scale(${1 + pulse}) rotateZ(0deg)`
+                  } else {
+                    // Phase 4: Dramatic exit with spin and fade (75-100%)
+                    const phaseProgress = (scrollProgress - 0.75) / 0.25
+                    const accelerate = Math.pow(phaseProgress, 2)
+                    return `translateX(${40 * accelerate}vw) translateY(${60 * accelerate}px) scale(${1 - accelerate * 0.5}) rotateZ(${45 * accelerate}deg)`
+                  }
+                })(),
+                opacity: (() => {
+                  if (scrollProgress <= 0.05) return 0
+                  if (scrollProgress <= 0.25) return (scrollProgress - 0.05) / 0.2
+                  if (scrollProgress <= 0.75) return 1
+                  return Math.max(1 - ((scrollProgress - 0.75) / 0.25) * 2, 0)
+                })(),
+                filter: (() => {
+                  if (scrollProgress > 0.4 && scrollProgress < 0.6) {
+                    const glowIntensity = Math.sin((scrollProgress - 0.4) / 0.2 * Math.PI)
+                    return `drop-shadow(0 0 ${glowIntensity * 20}px rgba(249, 115, 22, 0.5)) brightness(${1 + glowIntensity * 0.2})`
+                  }
+                  return 'none'
+                })(),
+                transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                textShadow: scrollProgress > 0.4 && scrollProgress < 0.6 
+                  ? `0 0 30px rgba(249, 115, 22, ${Math.sin((scrollProgress - 0.4) / 0.2 * Math.PI) * 0.6})` 
+                  : 'none'
+              }}
+            >
+              BANGERA
+            </p>
+
+            {/* Connecting Energy Effect */}
+            {scrollProgress > 0.35 && scrollProgress < 0.65 && (
+              <div 
+                className="absolute top-8 left-1/2 transform -translate-x-1/2 pointer-events-none"
+                style={{
+                  width: `${Math.sin((scrollProgress - 0.35) / 0.3 * Math.PI) * 200}px`,
+                  height: '2px',
+                  background: `linear-gradient(90deg, transparent, rgba(249, 115, 22, ${Math.sin((scrollProgress - 0.35) / 0.3 * Math.PI) * 0.8}), transparent)`,
+                  boxShadow: `0 0 10px rgba(249, 115, 22, ${Math.sin((scrollProgress - 0.35) / 0.3 * Math.PI) * 0.5})`,
+                  transition: 'all 0.3s ease-out'
+                }}
+              />
+            )}
+          </div>
         </div>
       </div>
 
