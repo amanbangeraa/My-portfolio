@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Menu, Mail, Github, Home, User, Briefcase, MessageCircle, Moon, Sun, Code, Palette, Zap } from "lucide-react"
+import { Menu, Mail, Github, Home, User, Briefcase, MessageCircle, Moon, Sun, Code, Palette, Zap, Search } from "lucide-react"
 import { Outfit } from "next/font/google"
 import { useState, useEffect } from "react"
 
@@ -128,6 +128,21 @@ export default function Portfolio() {
         <div className="shape shape-square" />
         <div className="shape shape-hexagon" />
       </div>
+
+      {/* Subtle Background Quote Effect */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-1/4 left-0 right-0 text-center animate-scroll-up opacity-[0.03] dark:opacity-[0.05]">
+          <p className="text-8xl md:text-9xl lg:text-[12rem] font-bold text-zinc-900 dark:text-white whitespace-nowrap transform rotate-[-5deg] select-none">
+            INNOVATE • CREATE • INSPIRE • DEVELOP • DESIGN • BUILD • DREAM • ACHIEVE •
+          </p>
+        </div>
+        <div className="absolute top-3/4 left-0 right-0 text-center animate-scroll-down opacity-[0.03] dark:opacity-[0.05]">
+          <p className="text-8xl md:text-9xl lg:text-[12rem] font-bold text-zinc-900 dark:text-white whitespace-nowrap transform rotate-[3deg] select-none">
+            • PASSION • PRECISION • PROGRESS • PERFORMANCE • PERFECTION • PURPOSE •
+          </p>
+        </div>
+      </div>
+
       {/* Header */}
       <header className="flex items-center justify-between p-6 md:p-8 animate-fade-in">
         <h1 className="text-xl font-semibold text-zinc-900 dark:text-white">Aman Bangera</h1>
@@ -144,7 +159,8 @@ export default function Portfolio() {
             variant="secondary"
             className="bg-zinc-800 dark:bg-zinc-700 text-white hover:bg-zinc-700 dark:hover:bg-zinc-600 rounded-full px-6"
           >
-            Learn more
+            <Search className="h-4 w-4 mr-2" />
+            Search
           </Button>
           <Button variant="ghost" size="icon">
             <Menu className="h-5 w-5" />
