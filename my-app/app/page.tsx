@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Menu, Mail, Github, Home, User, Briefcase, MessageCircle, Moon, Sun, Code, Palette, Zap, Search } from "lucide-react"
 import { Outfit } from "next/font/google"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 
 const outfit = Outfit({ subsets: ["latin"] })
 
