@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Mail, Github, Linkedin, ExternalLink, Sun, Moon, MapPin, Phone, Quote } from 'lucide-react'
+import { Mail, Github, Linkedin, ExternalLink, Sun, Moon, MapPin, Phone } from 'lucide-react'
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -23,37 +23,8 @@ export default function Portfolio() {
   const projectsRef = useRef<HTMLDivElement>(null)
   const contactRef = useRef<HTMLDivElement>(null)
   
-  // Quote refs
-  const quote1Ref = useRef<HTMLDivElement>(null)
-  const quote2Ref = useRef<HTMLDivElement>(null)
-  const quote3Ref = useRef<HTMLDivElement>(null)
-  const quote4Ref = useRef<HTMLDivElement>(null)
-
   // Floating elements refs
   const floatingElementsRef = useRef<HTMLDivElement>(null)
-
-  const quotes = [
-    {
-      text: "The best way to predict the future is to create it.",
-      author: "Peter Drucker",
-      ref: quote1Ref
-    },
-    {
-      text: "Innovation distinguishes between a leader and a follower.",
-      author: "Steve Jobs",
-      ref: quote2Ref
-    },
-    {
-      text: "Design is not just what it looks like — design is how it works.",
-      author: "Steve Jobs",
-      ref: quote3Ref
-    },
-    {
-      text: "The only way to do great work is to love what you do.",
-      author: "Steve Jobs",
-      ref: quote4Ref
-    }
-  ]
 
   // Dark mode toggle
   const toggleDarkMode = () => {
@@ -140,23 +111,6 @@ export default function Portfolio() {
         }
       })
 
-      // Quote 1 - Transition to About
-      ScrollTrigger.create({
-        trigger: aboutRef.current,
-        start: "top bottom",
-        end: "top center",
-        scrub: 1,
-        onUpdate: (self) => {
-          const progress = self.progress
-          gsap.to(quote1Ref.current, {
-            opacity: progress < 0.5 ? progress * 2 : (1 - progress) * 2,
-            scale: 1 + progress * 0.2,
-            y: progress * -50,
-            duration: 0.3
-          })
-        }
-      })
-
       // Enhanced About section reveal with morphing effect
       ScrollTrigger.create({
         trigger: aboutRef.current,
@@ -213,23 +167,6 @@ export default function Portfolio() {
         }
       })
 
-      // Quote 2 - Transition to Experience
-      ScrollTrigger.create({
-        trigger: experienceRef.current,
-        start: "top bottom",
-        end: "top center",
-        scrub: 1,
-        onUpdate: (self) => {
-          const progress = self.progress
-          gsap.to(quote2Ref.current, {
-            opacity: progress < 0.5 ? progress * 2 : (1 - progress) * 2,
-            scale: 1 + progress * 0.3,
-            rotationY: progress * 20,
-            duration: 0.3
-          })
-        }
-      })
-
       // Experience section with wave reveal
       ScrollTrigger.create({
         trigger: experienceRef.current,
@@ -279,23 +216,6 @@ export default function Portfolio() {
         }
       })
 
-      // Quote 3 - Transition to Projects
-      ScrollTrigger.create({
-        trigger: projectsRef.current,
-        start: "top bottom",
-        end: "top center",
-        scrub: 1,
-        onUpdate: (self) => {
-          const progress = self.progress
-          gsap.to(quote3Ref.current, {
-            opacity: progress < 0.5 ? progress * 2 : (1 - progress) * 2,
-            scale: 1 + progress * 0.25,
-            x: Math.sin(progress * Math.PI) * 30,
-            duration: 0.3
-          })
-        }
-      })
-
       // Projects section with diagonal reveal
       ScrollTrigger.create({
         trigger: projectsRef.current,
@@ -341,23 +261,6 @@ export default function Portfolio() {
               }
             }
           )
-        }
-      })
-
-      // Quote 4 - Transition to Contact
-      ScrollTrigger.create({
-        trigger: contactRef.current,
-        start: "top bottom",
-        end: "top center",
-        scrub: 1,
-        onUpdate: (self) => {
-          const progress = self.progress
-          gsap.to(quote4Ref.current, {
-            opacity: progress < 0.5 ? progress * 2 : (1 - progress) * 2,
-            scale: 1 + progress * 0.4,
-            rotationZ: progress * 10,
-            duration: 0.3
-          })
         }
       })
 
@@ -423,25 +326,6 @@ export default function Portfolio() {
         )}
       </button>
 
-      {/* Floating Quote Overlays */}
-      {quotes.map((quote, index) => (
-        <div
-          key={index}
-          ref={quote.ref}
-          className="fixed inset-0 z-30 flex items-center justify-center pointer-events-none opacity-0"
-        >
-          <div className="text-center px-6 max-w-2xl">
-            <Quote className="w-12 h-12 mx-auto mb-6 text-gray-400 dark:text-gray-500" />
-            <blockquote className="text-2xl md:text-3xl font-light text-gray-800 dark:text-gray-200 mb-4 leading-relaxed">
-              "{quote.text}"
-            </blockquote>
-            <cite className="text-lg text-gray-600 dark:text-gray-400 font-medium">
-              — {quote.author}
-            </cite>
-          </div>
-        </div>
-      ))}
-
       {/* Fixed Hero Background */}
       <div 
         ref={heroRef}
@@ -450,23 +334,26 @@ export default function Portfolio() {
         {/* Complex background elements */}
         <div ref={floatingElementsRef} className="absolute inset-0">
           {/* Floating geometric shapes */}
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="floating-element absolute opacity-10 dark:opacity-20"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-            >
-              <div className={`w-${8 + i * 2} h-${8 + i * 2} bg-gradient-to-br from-blue-500 to-purple-500 rounded-full`} />
-            </div>
-          ))}
+          {[...Array(8)].map((_, i) => {
+            const sizes = ['w-8 h-8', 'w-10 h-10', 'w-12 h-12', 'w-16 h-16', 'w-20 h-20', 'w-24 h-24', 'w-28 h-28', 'w-32 h-32']
+            return (
+              <div
+                key={i}
+                className="floating-element absolute opacity-10 dark:opacity-20"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+              >
+                <div className={`${sizes[i]} bg-gradient-to-br from-blue-500 to-purple-500 rounded-full`} />
+              </div>
+            )
+          })}
           
           {/* Background pattern elements */}
-          <div className="hero-bg-element absolute top-20 left-20 w-96 h-96 bg-gradient-radial from-blue-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl" />
-          <div className="hero-bg-element absolute bottom-32 right-32 w-80 h-80 bg-gradient-radial from-pink-500/10 via-orange-500/5 to-transparent rounded-full blur-3xl" />
-          <div className="hero-bg-element absolute top-1/2 left-1/3 w-64 h-64 bg-gradient-radial from-cyan-500/10 via-teal-500/5 to-transparent rounded-full blur-2xl" />
+          <div className="hero-bg-element absolute top-20 left-20 w-96 h-96 bg-[radial-gradient(ellipse_at_center,theme(colors.blue.500/0.1),theme(colors.purple.500/0.05),transparent)] rounded-full blur-3xl" />
+          <div className="hero-bg-element absolute bottom-32 right-32 w-80 h-80 bg-[radial-gradient(ellipse_at_center,theme(colors.pink.500/0.1),theme(colors.orange.500/0.05),transparent)] rounded-full blur-3xl" />
+          <div className="hero-bg-element absolute top-1/2 left-1/3 w-64 h-64 bg-[radial-gradient(ellipse_at_center,theme(colors.cyan.500/0.1),theme(colors.teal.500/0.05),transparent)] rounded-full blur-2xl" />
         </div>
 
         {/* Hero Content */}
@@ -500,12 +387,12 @@ export default function Portfolio() {
         {/* Spacer for hero */}
         <div className="h-screen" />
 
-        {/* About Section */}
+        {/* About Section with improved stacking */}
         <div 
           ref={aboutRef}
           className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center relative overflow-hidden"
         >
-          <div className="container mx-auto px-6 py-20">
+          <div className="container mx-auto px-6 py-20 relative z-20">
             <div className="max-w-4xl mx-auto">
               <h2 className="about-title text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-12 tracking-tight">
                 About Me
@@ -551,12 +438,12 @@ export default function Portfolio() {
           </div>
         </div>
 
-        {/* Experience Section */}
+        {/* Experience Section with improved stacking */}
         <div 
           ref={experienceRef}
           className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center relative overflow-hidden"
         >
-          <div className="container mx-auto px-6 py-20">
+          <div className="container mx-auto px-6 py-20 relative z-20">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-16 tracking-tight">
                 Experience
@@ -564,7 +451,7 @@ export default function Portfolio() {
               
               <div className="space-y-12 relative">
                 {/* Timeline line */}
-                <div className="absolute left-0 md:left-20 top-0 bottom-0 w-px bg-gradient-to-b from-gray-300 via-gray-400 to-gray-300 dark:from-gray-600 dark:via-gray-500 dark:to-gray-600" />
+                <div className="hidden md:block absolute left-0 md:left-20 top-0 bottom-0 w-px bg-gradient-to-b from-gray-300 via-gray-400 to-gray-300 dark:from-gray-600 dark:via-gray-500 dark:to-gray-600" />
                 
                 {[
                   {
@@ -588,7 +475,7 @@ export default function Portfolio() {
                 ].map((exp, index) => (
                   <div key={index} className="experience-item relative">
                     {/* Timeline dot */}
-                    <div className="timeline-dot absolute left-0 md:left-20 w-4 h-4 bg-blue-500 dark:bg-blue-400 rounded-full transform -translate-x-1/2 border-4 border-white dark:border-gray-900" />
+                    <div className="timeline-dot hidden md:block absolute left-0 md:left-20 w-4 h-4 bg-blue-500 dark:bg-blue-400 rounded-full transform -translate-x-1/2 border-4 border-white dark:border-gray-900" />
                     
                     <div className="grid md:grid-cols-4 gap-6 items-start pl-8 md:pl-32">
                       <div className="text-sm text-gray-500 dark:text-gray-400 font-medium tracking-wide">
@@ -665,9 +552,9 @@ export default function Portfolio() {
                 ].map((project, index) => (
                   <div
                     key={index}
-                    className="project-card group cursor-pointer"
+                    className="project-card group cursor-pointer relative hover:z-10"
                   >
-                    <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg hover:shadow-xl transition-all duration-500 border border-gray-200 dark:border-gray-700 h-full hover:scale-105 hover:-rotate-1">
+                    <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg hover:shadow-xl transition-all duration-500 border border-gray-200 dark:border-gray-700 h-full hover:scale-105 hover:-rotate-1 transform-gpu will-change-transform">
                       <div className="text-xs text-gray-500 dark:text-gray-400 font-medium tracking-wide uppercase mb-3">
                         {project.category}
                       </div>
