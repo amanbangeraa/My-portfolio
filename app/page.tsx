@@ -8,21 +8,51 @@ import TextPressure from './components/TextPressure';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const heroRef = useRef<HTMLElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
+  const mouseBlobRef = useRef<HTMLDivElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const targetPos = useRef({ x: 0.5, y: 0.5 });
+  const currentPos = useRef({ x: 0.5, y: 0.5 });
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({
+      targetPos.current = {
         x: e.clientX / window.innerWidth,
         y: e.clientY / window.innerHeight,
-      });
+      };
+    };
+
+    const animateBlob = () => {
+      // Smooth interpolation with easing
+      const lerp = (start: number, end: number, factor: number) => start + (end - start) * factor;
+      const easeOut = 0.08; // Lower value = smoother, more gradual movement
+      
+      currentPos.current.x = lerp(currentPos.current.x, targetPos.current.x, easeOut);
+      currentPos.current.y = lerp(currentPos.current.y, targetPos.current.y, easeOut);
+      
+      setMousePos({ ...currentPos.current });
+      
+      // Direct DOM manipulation for ultra-smooth movement
+      if (mouseBlobRef.current) {
+        mouseBlobRef.current.style.left = `${currentPos.current.x * 100}%`;
+        mouseBlobRef.current.style.top = `${currentPos.current.y * 100}%`;
+      }
+      
+      animationFrameRef.current = requestAnimationFrame(animateBlob);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    animateBlob(); // Start the animation loop
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -87,55 +117,62 @@ export default function Home() {
         >
           {/* Mouse-following blob - Large oval */}
           <div
-            className="absolute bg-indigo-500"
+            ref={mouseBlobRef}
+            className="absolute bg-gradient-to-br from-indigo-400 via-indigo-500 to-purple-600"
             style={{
-              width: '500px',
-              height: '320px',
+              width: '480px',
+              height: '300px',
               left: `${mousePos.x * 100}%`,
               top: `${mousePos.y * 100}%`,
               transform: 'translate(-50%, -50%)',
-              transition: 'all 0.8s ease-out',
               borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
+              willChange: 'transform, left, top',
+              boxShadow: '0 0 60px rgba(99, 102, 241, 0.3), 0 0 120px rgba(99, 102, 241, 0.1)',
+              filter: 'blur(1px)',
             }}
           />
           
           {/* Animated blob 1 - Large irregular */}
           <div 
-            className="absolute bg-purple-500 animate-blob1"
+            className="absolute bg-gradient-to-br from-purple-400 via-purple-500 to-indigo-600 animate-blob1"
             style={{
-              width: '650px',
-              height: '400px',
+              width: '620px',
+              height: '380px',
               borderRadius: '70% 30% 60% 40% / 50% 70% 30% 50%',
+              boxShadow: '0 0 40px rgba(147, 51, 234, 0.2)',
             }}
           />
 
           {/* Animated blob 2 - Medium teardrop */}
           <div 
-            className="absolute bg-indigo-400 animate-blob2"
+            className="absolute bg-gradient-to-br from-indigo-300 via-indigo-400 to-purple-500 animate-blob2"
             style={{
-              width: '420px',
-              height: '550px',
+              width: '400px',
+              height: '520px',
               borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+              boxShadow: '0 0 35px rgba(129, 140, 248, 0.25)',
             }}
           />
           
           {/* Animated blob 3 - Small round */}
           <div 
-            className="absolute bg-purple-400 animate-blob3"
+            className="absolute bg-gradient-to-br from-purple-300 via-purple-400 to-indigo-500 animate-blob3"
             style={{
-              width: '280px',
-              height: '280px',
+              width: '260px',
+              height: '260px',
               borderRadius: '40% 60% 70% 30% / 40% 50% 50% 60%',
+              boxShadow: '0 0 30px rgba(196, 181, 253, 0.3)',
             }}
           />
 
           {/* Animated blob 4 - Extra large organic */}
           <div 
-            className="absolute bg-violet-500 animate-blob4"
+            className="absolute bg-gradient-to-br from-violet-400 via-violet-500 to-purple-600 animate-blob4"
             style={{
-              width: '750px',
-              height: '450px',
+              width: '720px',
+              height: '430px',
               borderRadius: '80% 20% 50% 50% / 30% 80% 20% 70%',
+              boxShadow: '0 0 50px rgba(139, 92, 246, 0.2)',
             }}
           />
         </div>
@@ -185,40 +222,40 @@ export default function Home() {
           }
           
           @keyframes blob1 {
-            0%, 100% { transform: translate(10vw, 20vh) scale(1) rotate(0deg); }
-            25% { transform: translate(40vw, 50vh) scale(1.2) rotate(90deg); }
-            50% { transform: translate(70vw, 10vh) scale(0.9) rotate(180deg); }
-            75% { transform: translate(20vw, 80vh) scale(1.1) rotate(270deg); }
+            0%, 100% { transform: translate(15vw, 25vh) scale(1) rotate(0deg); }
+            25% { transform: translate(35vw, 45vh) scale(1.1) rotate(45deg); }
+            50% { transform: translate(65vw, 15vh) scale(0.95) rotate(90deg); }
+            75% { transform: translate(25vw, 75vh) scale(1.05) rotate(135deg); }
           }
           @keyframes blob2 {
-            0%, 100% { transform: translate(80vw, 70vh) scale(1) rotate(0deg); }
-            25% { transform: translate(50vw, 30vh) scale(1.1) rotate(45deg); }
-            50% { transform: translate(20vw, 60vh) scale(0.8) rotate(135deg); }
-            75% { transform: translate(60vw, 90vh) scale(1.2) rotate(225deg); }
+            0%, 100% { transform: translate(75vw, 65vh) scale(1) rotate(0deg); }
+            25% { transform: translate(55vw, 35vh) scale(1.08) rotate(30deg); }
+            50% { transform: translate(25vw, 55vh) scale(0.92) rotate(60deg); }
+            75% { transform: translate(65vw, 85vh) scale(1.12) rotate(90deg); }
           }
           @keyframes blob3 {
-            0%, 100% { transform: translate(50vw, 50vh) scale(1) rotate(0deg); }
-            25% { transform: translate(20vw, 20vh) scale(0.9) rotate(120deg); }
-            50% { transform: translate(80vw, 40vh) scale(1.2) rotate(240deg); }
-            75% { transform: translate(40vw, 70vh) scale(1.1) rotate(360deg); }
+            0%, 100% { transform: translate(45vw, 45vh) scale(1) rotate(0deg); }
+            25% { transform: translate(25vw, 25vh) scale(0.95) rotate(60deg); }
+            50% { transform: translate(75vw, 35vh) scale(1.15) rotate(120deg); }
+            75% { transform: translate(35vw, 65vh) scale(1.02) rotate(180deg); }
           }
           @keyframes blob4 {
-            0%, 100% { transform: translate(30vw, 80vh) scale(1) rotate(0deg); }
-            25% { transform: translate(70vw, 20vh) scale(0.8) rotate(60deg); }
-            50% { transform: translate(10vw, 50vh) scale(1.3) rotate(180deg); }
-            75% { transform: translate(90vw, 70vh) scale(1) rotate(300deg); }
+            0%, 100% { transform: translate(35vw, 75vh) scale(1) rotate(0deg); }
+            25% { transform: translate(65vw, 25vh) scale(0.88) rotate(40deg); }
+            50% { transform: translate(15vw, 45vh) scale(1.2) rotate(80deg); }
+            75% { transform: translate(85vw, 65vh) scale(0.98) rotate(120deg); }
           }
           .animate-blob1 {
-            animation: blob1 20s ease-in-out infinite;
+            animation: blob1 28s ease-in-out infinite;
           }
           .animate-blob2 {
-            animation: blob2 22s ease-in-out infinite alternate;
+            animation: blob2 32s ease-in-out infinite alternate;
           }
           .animate-blob3 {
-            animation: blob3 18s ease-in-out infinite;
+            animation: blob3 24s ease-in-out infinite;
           }
           .animate-blob4 {
-            animation: blob4 24s ease-in-out infinite alternate;
+            animation: blob4 36s ease-in-out infinite alternate;
           }
         `}</style>
         
