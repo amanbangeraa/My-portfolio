@@ -1,9 +1,16 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const heroRef = useRef<HTMLElement>(null);
+  const quoteRef = useRef<HTMLDivElement>(null);
+  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -17,22 +24,64 @@ export default function Home() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  useEffect(() => {
+    // GSAP scroll animation
+    const ctx = gsap.context(() => {
+      // Set initial state - quote is hidden
+      gsap.set(quoteRef.current, { opacity: 0, y: 50 });
+
+      // Create scroll trigger animation
+      ScrollTrigger.create({
+        trigger: document.body,
+        start: "top top",
+        end: "300vh top",
+        onUpdate: (self) => {
+          const progress = self.progress;
+          
+                    // Fade out hero section
+          gsap.to(heroRef.current, {
+            opacity: 1 - progress,
+            duration: 0.5,
+            ease: "power2.out"
+          });
+          
+          // Fade in quote section
+          gsap.to(quoteRef.current, {
+            opacity: progress,
+            y: 50 - (progress * 50),
+            duration: 0.7,
+            ease: "power2.out"
+          });
+          
+          // Fade out scroll indicator
+          gsap.to(scrollIndicatorRef.current, {
+            opacity: 1 - progress,
+            duration: 0.7,
+            ease: "power2.out"
+          });
+        }
+      });
+    });
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
       <link href="https://fonts.googleapis.com/css2?family=Qwigley&display=swap" rel="stylesheet" />
-      <main className="relative min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center overflow-hidden font-['Outfit']">
+      <main className="relative min-h-[400vh] bg-[#0a0a0a] flex flex-col items-center justify-center overflow-hidden font-['Outfit']">
         {/* Logo at top left */}
         <div className="absolute top-6 left-6 z-20">
-            <div className="text-white">
-            <span className="text-2xl font-bold">Aman </span>
-            <span className="text-2xl" style={{ fontFamily: "'outfit', cursive" }}>Bangera</span>
-            </div>
+          <div className="text-white">
+            <span className="text-lg font-bold">Aman </span>
+            <span className="text-lg" style={{ fontFamily: "'outfit', cursive" }}>Bangera</span>
+          </div>
         </div>
 
         {/* Fluid Water Motion Background */}
         <div
-          className="absolute inset-0 z-0 pointer-events-none"
+          className="fixed inset-0 z-0 pointer-events-none"
           style={{ filter: 'blur(80px)', opacity: 0.6 }}
         >
           {/* Mouse-following blob - Large oval */}
@@ -92,7 +141,7 @@ export default function Home() {
 
         {/* Clean edge vignette */}
         <div
-          className="absolute inset-0"
+          className="fixed inset-0"
           style={{
             background: `
               radial-gradient(ellipse 115% 105% at 50% 50%,
@@ -145,23 +194,43 @@ export default function Home() {
         `}</style>
         
         {/* Hero Section */}
-        <section className="relative z-10 flex flex-col items-center justify-center min-h-screen">
-          <div className="relative flex flex-col items-center">
+        <section
+          ref={heroRef}
+          className="fixed inset-0 z-10 flex flex-col items-center justify-center min-h-screen"
+          style={{ pointerEvents: 'none' }}
+        >
+          <div className="w-full flex flex-col items-center justify-center">
             {/* Main text */}
-            <h1 className="relative text-2xl md:text-6xl lg:text-7xl font-black text-white text-center leading-tight tracking-tight">
-              Just my Reflection.
-            </h1>
-            {/* Bangera text below */}
-            <div className="mt-4">
-              <span className="text-xl md:text-6xl lg:text-8xl text-white opacity-25" style={{ fontFamily: "'Qwigley', cursive" }}>
-                Bangera
-              </span>
+            <div className="text-center relative">
+              <h1 className="text-3xl md:text-7xl lg:text-8xl font-light text-white leading-tight tracking-wide mb-2 opacity-60 relative z-10">
+                <span className="font-light">I'm </span>
+                <span className="font-bold font-['Outfit']">Aman</span>
+              </h1>
+              {/* Bangera in elegant script - overlapping */}
+              <div className="relative -mt-4 md:-mt-8 lg:-mt-12">
+                <span 
+                  className="text-4xl md:text-8xl lg:text-9xl text-white opacity-90 block relative z-20"
+                  style={{ 
+                    fontFamily: "'Qwigley', cursive",
+                    letterSpacing: '0.05em',
+                    lineHeight: '1.1',
+                    textShadow: '0 0 20px rgba(255, 255, 255, 0.1)'
+                  }}
+                >
+                  Bangera
+                </span>
+                {/* Subtle underline accent */}
+                <div 
+                  className="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-px bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
+                  style={{ width: '60%' }}
+                />
+              </div>
             </div>
           </div>
         </section>
-
-        {/* Scroll indicator at bottom */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center">
+        
+        {/* Scroll indicator at bottom of screen */}
+        <div ref={scrollIndicatorRef} className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none">
           <p className="text-white text-sm mb-2 opacity-70">Scroll to stalk more</p>
           <div className="animate-bounce">
             <svg 
@@ -178,6 +247,13 @@ export default function Home() {
               />
             </svg>
           </div>
+        </div>
+
+        {/* Quote Section - appears on scroll */}
+        <div ref={quoteRef} className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white text-center leading-tight tracking-tight">
+            Or am I?
+          </h2>
         </div>
       </main>
     </>
