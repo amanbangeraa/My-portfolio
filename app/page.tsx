@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import TextPressure from './components/TextPressure';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -155,6 +156,34 @@ export default function Home() {
         />
         
         <style jsx>{`
+          .shiny-text {
+            color: #b5b5b5a4;
+            background: linear-gradient(
+              120deg,
+              rgba(255, 255, 255, 0) 40%,
+              rgba(255, 255, 255, 0.8) 50%,
+              rgba(255, 255, 255, 0) 60%
+            );
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            display: inline-block;
+            animation: shine 5s linear infinite;
+          }
+          
+          @keyframes shine {
+            0% {
+              background-position: 100%;
+            }
+            100% {
+              background-position: -100%;
+            }
+          }
+          
+          .shiny-text.disabled {
+            animation: none;
+          }
+          
           @keyframes blob1 {
             0%, 100% { transform: translate(10vw, 20vh) scale(1) rotate(0deg); }
             25% { transform: translate(40vw, 50vh) scale(1.2) rotate(90deg); }
@@ -209,7 +238,7 @@ export default function Home() {
               {/* Bangera in elegant script - overlapping */}
               <div className="relative -mt-4 md:-mt-8 lg:-mt-12">
                 <span 
-                  className="text-4xl md:text-8xl lg:text-9xl text-white opacity-90 block relative z-20"
+                  className="text-4xl md:text-8xl lg:text-9xl block relative z-20 shiny-text"
                   style={{ 
                     fontFamily: "'Qwigley', cursive",
                     letterSpacing: '0.05em',
@@ -251,9 +280,15 @@ export default function Home() {
 
         {/* Quote Section - appears on scroll */}
         <div ref={quoteRef} className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white text-center leading-tight tracking-tight">
-            Or am I?
-          </h2>
+          <div className="font-black text-white text-center leading-tight tracking-tight" style={{fontSize: '12rem'}}>
+            <TextPressure 
+              text="Or am I?" 
+              textColor="#FFFFFF"
+              weight={true}
+              scale={true}
+              minFontSize={120}
+            />
+          </div>
         </div>
       </main>
     </>
