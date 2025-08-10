@@ -30,8 +30,8 @@ export default function Home() {
           <div
             className="absolute bg-indigo-500"
             style={{
-              width: '400px',
-              height: '250px',
+              width: '500px',
+              height: '320px',
               left: `${mousePos.x * 100}%`,
               top: `${mousePos.y * 100}%`,
               transform: 'translate(-50%, -50%)',
@@ -44,8 +44,8 @@ export default function Home() {
           <div 
             className="absolute bg-purple-500 animate-blob1"
             style={{
-              width: '500px',
-              height: '300px',
+              width: '650px',
+              height: '400px',
               borderRadius: '70% 30% 60% 40% / 50% 70% 30% 50%',
             }}
           />
@@ -54,8 +54,8 @@ export default function Home() {
           <div 
             className="absolute bg-indigo-400 animate-blob2"
             style={{
-              width: '320px',
-              height: '420px',
+              width: '420px',
+              height: '550px',
               borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
             }}
           />
@@ -64,8 +64,8 @@ export default function Home() {
           <div 
             className="absolute bg-purple-400 animate-blob3"
             style={{
-              width: '200px',
-              height: '200px',
+              width: '280px',
+              height: '280px',
               borderRadius: '40% 60% 70% 30% / 40% 50% 50% 60%',
             }}
           />
@@ -74,8 +74,8 @@ export default function Home() {
           <div 
             className="absolute bg-violet-500 animate-blob4"
             style={{
-              width: '600px',
-              height: '350px',
+              width: '750px',
+              height: '450px',
               borderRadius: '80% 20% 50% 50% / 30% 80% 20% 70%',
             }}
           />
@@ -137,7 +137,7 @@ export default function Home() {
         
         {/* Hero Section */}
         <section className="relative z-10 flex flex-col items-center justify-center min-h-screen">
-          <h1 className="text-3xl md:text-8xl lg:text-9xl font-black text-white text-center leading-tight tracking-tight">
+          <h1 className="text-2xl md:text-6xl lg:text-7xl font-black text-white text-center leading-tight tracking-tight">
             Just my Reflection.
           </h1>
         </section>
