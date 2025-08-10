@@ -20,7 +20,16 @@ export default function Home() {
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Qwigley&display=swap" rel="stylesheet" />
       <main className="relative min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center overflow-hidden font-['Outfit']">
+        {/* Logo at top left */}
+        <div className="absolute top-6 left-6 z-20">
+            <div className="text-white">
+            <span className="text-2xl font-bold">Aman </span>
+            <span className="text-2xl" style={{ fontFamily: "'outfit', cursive" }}>Bangera</span>
+            </div>
+        </div>
+
         {/* Fluid Water Motion Background */}
         <div
           className="absolute inset-0 z-0 pointer-events-none"
@@ -137,10 +146,39 @@ export default function Home() {
         
         {/* Hero Section */}
         <section className="relative z-10 flex flex-col items-center justify-center min-h-screen">
-          <h1 className="text-2xl md:text-6xl lg:text-7xl font-black text-white text-center leading-tight tracking-tight">
-            Just my Reflection.
-          </h1>
+          <div className="relative flex flex-col items-center">
+            {/* Main text */}
+            <h1 className="relative text-2xl md:text-6xl lg:text-7xl font-black text-white text-center leading-tight tracking-tight">
+              Just my Reflection.
+            </h1>
+            {/* Bangera text below */}
+            <div className="mt-4">
+              <span className="text-xl md:text-6xl lg:text-8xl text-white opacity-25" style={{ fontFamily: "'Qwigley', cursive" }}>
+                Bangera
+              </span>
+            </div>
+          </div>
         </section>
+
+        {/* Scroll indicator at bottom */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center">
+          <p className="text-white text-sm mb-2 opacity-70">Scroll to stalk more</p>
+          <div className="animate-bounce">
+            <svg 
+              className="w-6 h-6 text-white opacity-70" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
+            </svg>
+          </div>
+        </div>
       </main>
     </>
   );
