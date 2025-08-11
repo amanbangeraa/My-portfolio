@@ -4,11 +4,13 @@ import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import TextPressure from './components/TextPressure';
+import Toast from './components/Toast';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const [showToast, setShowToast] = useState(true);
   const heroRef = useRef<HTMLElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
@@ -192,11 +194,18 @@ export default function Home() {
     return () => ctx.revert();
   }, []);
 
+  const handleDismissToast = () => {
+    setShowToast(false);
+  };
+
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
       <link href="https://fonts.googleapis.com/css2?family=Qwigley&display=swap" rel="stylesheet" />
       <main className="relative min-h-[1200vh] bg-[#0a0a0a] flex flex-col items-center justify-center overflow-hidden font-['Outfit']">
+        {/* Toast Notification */}
+        {showToast && <Toast onDismiss={handleDismissToast} />}
+
         {/* Logo at top left */}
         <div className="absolute top-6 left-6 z-20">
           <div className="text-white">
