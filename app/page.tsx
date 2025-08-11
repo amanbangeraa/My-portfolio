@@ -11,6 +11,7 @@ export default function Home() {
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const heroRef = useRef<HTMLElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
+  const aboutRef = useRef<HTMLDivElement>(null);
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
   const mouseBlobRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -58,38 +59,132 @@ export default function Home() {
   useEffect(() => {
     // GSAP scroll animation
     const ctx = gsap.context(() => {
-      // Set initial state - quote is hidden
+      // Set initial state - quote and about are hidden
       gsap.set(quoteRef.current, { opacity: 0, y: 50 });
+      gsap.set(aboutRef.current, { opacity: 0, scale: 0.8, y: 100 });
 
       // Create scroll trigger animation
       ScrollTrigger.create({
         trigger: document.body,
         start: "top top",
-        end: "300vh top",
+        end: "1200vh top", // Extended much more for longer quote display
         onUpdate: (self) => {
           const progress = self.progress;
           
-                    // Fade out hero section
-          gsap.to(heroRef.current, {
-            opacity: 1 - progress,
-            duration: 0.5,
-            ease: "power2.out"
-          });
+          // Phase 1: Extended Hero Display with long delay (0 to 0.4)
+          if (progress <= 0.4) {
+            // Show only hero section during extended delay
+            gsap.set(heroRef.current, { display: 'flex' });
+            gsap.set(quoteRef.current, { display: 'none' });
+            gsap.set(aboutRef.current, { display: 'none' });
+            
+            // Keep hero fully visible
+            gsap.to(heroRef.current, {
+              opacity: 1,
+              duration: 0.3,
+              ease: "power2.out"
+            });
+            
+            // Keep scroll indicator visible
+            gsap.to(scrollIndicatorRef.current, {
+              opacity: 1,
+              duration: 0.3,
+              ease: "power2.out"
+            });
+          }
           
-          // Fade in quote section
-          gsap.to(quoteRef.current, {
-            opacity: progress,
-            y: 50 - (progress * 50),
-            duration: 0.7,
-            ease: "power2.out"
-          });
+          // Phase 2: Hero to Quote transition (0.4 to 0.45)
+          else if (progress > 0.4 && progress <= 0.45) {
+            const phase2Progress = (progress - 0.4) / 0.05;
+            
+            // Show both hero and quote during transition
+            gsap.set(heroRef.current, { display: 'flex' });
+            gsap.set(quoteRef.current, { display: 'flex' });
+            gsap.set(aboutRef.current, { display: 'none' });
+            
+            // Fade out hero section
+            gsap.to(heroRef.current, {
+              opacity: 1 - phase2Progress,
+              duration: 0.5,
+              ease: "power2.out"
+            });
+            
+            // Fade in quote section
+            gsap.to(quoteRef.current, {
+              opacity: phase2Progress,
+              y: 50 - (phase2Progress * 50),
+              duration: 0.7,
+              ease: "power2.out"
+            });
+            
+            // Fade out scroll indicator
+            gsap.to(scrollIndicatorRef.current, {
+              opacity: 1 - phase2Progress,
+              duration: 0.7,
+              ease: "power2.out"
+            });
+          }
           
-          // Fade out scroll indicator
-          gsap.to(scrollIndicatorRef.current, {
-            opacity: 1 - progress,
-            duration: 0.7,
-            ease: "power2.out"
-          });
+          // Phase 3: VERY Extended Quote Display (0.45 to 0.9)
+          else if (progress > 0.45 && progress <= 0.9) {
+            // Show only quote section during very extended delay
+            gsap.set(heroRef.current, { display: 'none' });
+            gsap.set(quoteRef.current, { display: 'flex' });
+            gsap.set(aboutRef.current, { display: 'none' });
+            
+            // Keep quote fully visible
+            gsap.to(quoteRef.current, {
+              opacity: 1,
+              scale: 1,
+              rotationY: 0,
+              filter: 'blur(0px)',
+              duration: 0.3,
+              ease: "power2.out"
+            });
+          }
+          
+          // Phase 4: Quote Engulfment and About Reveal (0.9 to 1.0)
+          else if (progress > 0.9) {
+            const phase4Progress = (progress - 0.9) / 0.1;
+            
+            // Hide hero completely
+            gsap.set(heroRef.current, { display: 'none' });
+            
+            // Engulf quote with dramatic animation (0 to 0.4)
+            if (phase4Progress <= 0.4) {
+              const engulfProgress = phase4Progress / 0.4;
+              
+              gsap.set(quoteRef.current, { display: 'flex' });
+              gsap.set(aboutRef.current, { display: 'none' });
+              
+              gsap.to(quoteRef.current, {
+                opacity: 1 - engulfProgress,
+                scale: 1 + (engulfProgress * 2), // Grows larger
+                rotationY: engulfProgress * 180, // Flips
+                filter: `blur(${engulfProgress * 20}px)`,
+                duration: 0.8,
+                ease: "power3.out"
+              });
+            }
+            
+            // Reveal about section after delay (0.4 to 1.0)
+            if (phase4Progress > 0.4) {
+              const revealProgress = (phase4Progress - 0.4) / 0.6;
+              
+              // Hide quote, show about
+              gsap.set(quoteRef.current, { display: 'none' });
+              gsap.set(aboutRef.current, { display: 'flex' });
+              
+              // Reveal about section with smooth entrance
+              gsap.to(aboutRef.current, {
+                opacity: revealProgress,
+                scale: 0.8 + (revealProgress * 0.2),
+                y: 100 - (revealProgress * 100),
+                duration: 1.2,
+                ease: "power2.out"
+              });
+            }
+          }
         }
       });
     });
@@ -101,7 +196,7 @@ export default function Home() {
     <>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
       <link href="https://fonts.googleapis.com/css2?family=Qwigley&display=swap" rel="stylesheet" />
-      <main className="relative min-h-[400vh] bg-[#0a0a0a] flex flex-col items-center justify-center overflow-hidden font-['Outfit']">
+      <main className="relative min-h-[1200vh] bg-[#0a0a0a] flex flex-col items-center justify-center overflow-hidden font-['Outfit']">
         {/* Logo at top left */}
         <div className="absolute top-6 left-6 z-20">
           <div className="text-white">
@@ -296,7 +391,7 @@ export default function Home() {
         </section>
         
         {/* Scroll indicator at bottom of screen */}
-        <div ref={scrollIndicatorRef} className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none">
+        <div ref={scrollIndicatorRef} className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40 flex flex-col items-center pointer-events-none">
           <p className="text-white text-sm mb-2 opacity-70">Scroll to stalk more</p>
           <div className="animate-bounce">
             <svg 
@@ -316,7 +411,7 @@ export default function Home() {
         </div>
 
         {/* Quote Section - appears on scroll */}
-        <div ref={quoteRef} className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
+        <div ref={quoteRef} className="fixed inset-0 z-15 flex items-center justify-center pointer-events-none">
           <div className="font-black text-white text-center leading-tight tracking-tight" style={{fontSize: '12rem'}}>
             <TextPressure 
               text="Or am I?" 
@@ -325,6 +420,31 @@ export default function Home() {
               scale={true}
               minFontSize={120}
             />
+          </div>
+        </div>
+
+        {/* About Me Section - appears after quote engulfment */}
+        <div ref={aboutRef} className="fixed inset-0 z-30 flex items-center justify-center pointer-events-none">
+          <div className="max-w-4xl mx-auto px-8 text-center">
+            {/* Main heading */}
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-light text-white mb-6 tracking-tight">
+              About Me
+            </h1>
+            
+            {/* Subtitle */}
+            <h2 className="text-xl md:text-2xl lg:text-3xl text-gray-400 font-light mb-12 tracking-wide">
+              Full-Stack Developer & Professional Bug Creator
+            </h2>
+            
+            {/* Description */}
+            <p className="text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed mb-16 max-w-3xl mx-auto">
+              I turn coffee into code and ideas into digital reality. Occasionally, I even fix the bugs I create.
+            </p>
+            
+            {/* Single CTA */}
+            <button className="px-8 py-3 text-white text-lg font-medium hover:opacity-80 transition-opacity duration-300 pointer-events-auto border border-white/20 rounded-full backdrop-blur-sm">
+              Let's build something cool
+            </button>
           </div>
         </div>
       </main>
