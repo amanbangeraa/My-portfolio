@@ -118,7 +118,7 @@ const AboutSection = forwardRef<HTMLDivElement, AboutSectionProps>(
                 block transition-all duration-800 ease-in-out
                 ${isActive ? 'opacity-0 transform translate-y-2' : 'opacity-100 transform translate-y-0'}
               `}>
-                {isMobile ? (isClicked ? 'Tap again to close' : 'Tap to connect') : 'Let\'s build something cool'}
+                {isMobile ? (isClicked ? 'Tap again to close' : 'Tap to connect') : 'Lets Connect!'}
               </span>
               
               {/* Social Icons - appear on interaction */}
