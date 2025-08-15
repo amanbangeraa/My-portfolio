@@ -82,19 +82,19 @@ const AboutSection = forwardRef<HTMLDivElement, AboutSectionProps>(
 
     return (
       <div ref={ref} className={`fixed inset-0 z-30 flex items-center justify-center pointer-events-none ${className || ''}`}>
-        <div className="max-w-4xl mx-auto px-8 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Main heading */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-light text-white mb-6 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-white mb-4 sm:mb-6 tracking-tight">
             About Me
           </h1>
           
           {/* Subtitle */}
-          <h2 className="text-xl md:text-2xl lg:text-3xl text-gray-400 font-light mb-12 tracking-wide">
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-400 font-light mb-8 sm:mb-12 tracking-wide">
             Professional Bug Creator
           </h2>
           
           {/* Description */}
-          <p className="text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed mb-16 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed mb-12 sm:mb-16 max-w-3xl mx-auto">
             I turn coffee into code and ideas into digital reality. Occasionally, I even fix the bugs I create.
           </p>
           
@@ -103,9 +103,11 @@ const AboutSection = forwardRef<HTMLDivElement, AboutSectionProps>(
             {/* Main CTA Button */}
             <button 
               className={`
-                px-8 py-3 text-white text-lg font-medium border border-white/20 rounded-full backdrop-blur-sm
+                px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg font-medium text-white 
+                border border-white/20 rounded-full backdrop-blur-sm
                 transition-all duration-1000 ease-in-out
                 hover:border-white/40 hover:backdrop-blur-md
+                touch-manipulation select-none
                 ${isActive ? 'transform scale-105' : ''}
                 ${isMobile ? 'active:scale-95' : ''}
               `}
@@ -121,7 +123,7 @@ const AboutSection = forwardRef<HTMLDivElement, AboutSectionProps>(
               
               {/* Social Icons - appear on interaction */}
               <div className={`
-                absolute inset-0 flex items-center justify-center gap-4
+                absolute inset-0 flex items-center justify-center gap-3 sm:gap-4
                 transition-all duration-800 ease-in-out
                 ${isActive ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-2'}
               `}>
@@ -132,9 +134,9 @@ const AboutSection = forwardRef<HTMLDivElement, AboutSectionProps>(
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`
-                      group flex items-center justify-center w-8 h-8 text-white/70
+                      group flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 text-white/70
                       hover:text-white hover:scale-110 active:scale-95
-                      transition-all duration-400 ease-out
+                      transition-all duration-400 ease-out touch-manipulation
                       ${isActive ? 'transform scale-100' : 'transform scale-75'}
                     `}
                     style={{
@@ -145,7 +147,7 @@ const AboutSection = forwardRef<HTMLDivElement, AboutSectionProps>(
                       e.stopPropagation();
                     }}
                   >
-                    <div className="w-5 h-5">
+                    <div className="w-4 h-4 sm:w-5 sm:h-5">
                       {social.icon}
                     </div>
                   </a>
@@ -155,7 +157,7 @@ const AboutSection = forwardRef<HTMLDivElement, AboutSectionProps>(
             
             {/* Mobile-specific instruction */}
             {isMobile && !isActive && (
-              <p className="text-center text-white/50 text-sm mt-4 transition-opacity duration-500">
+              <p className="text-center text-white/50 text-xs sm:text-sm mt-3 sm:mt-4 transition-opacity duration-500">
                 Tap the button to reveal contact options
               </p>
             )}

@@ -12,6 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 export default function Home() {
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const [showToast, setShowToast] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
@@ -22,7 +23,22 @@ export default function Home() {
   const currentPos = useRef({ x: 0.5, y: 0.5 });
 
   useEffect(() => {
+    // Detect mobile devices
+    const checkDevice = () => {
+      setIsMobile(!window.matchMedia('(hover: hover)').matches || window.innerWidth < 768);
+    };
+    
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
+
+  useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
+      // Skip mouse tracking on mobile for better performance
+      if (isMobile) return;
+      
       targetPos.current = {
         x: e.clientX / window.innerWidth,
         y: e.clientY / window.innerHeight,
@@ -30,9 +46,8 @@ export default function Home() {
     };
 
     const animateBlob = () => {
-      // Smooth interpolation with easing
-      const lerp = (start: number, end: number, factor: number) => start + (end - start) * factor;
-      const easeOut = 0.08; // Lower value = smoother, more gradual movement
+      // Reduce animation complexity on mobile
+      const easeOut = isMobile ? 0.15 : 0.08;
       
       currentPos.current.x = lerp(currentPos.current.x, targetPos.current.x, easeOut);
       currentPos.current.y = lerp(currentPos.current.y, targetPos.current.y, easeOut);
@@ -48,29 +63,43 @@ export default function Home() {
       animationFrameRef.current = requestAnimationFrame(animateBlob);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    // Smooth interpolation with easing
+    const lerp = (start: number, end: number, factor: number) => start + (end - start) * factor;
+
+    // Only add mouse event listener on desktop
+    if (!isMobile) {
+      window.addEventListener('mousemove', handleMouseMove);
+    }
+    
     animateBlob(); // Start the animation loop
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      if (!isMobile) {
+        window.removeEventListener('mousemove', handleMouseMove);
+      }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
-    // GSAP scroll animation
+    // GSAP scroll animation with mobile optimizations
     const ctx = gsap.context(() => {
       // Set initial state - quote and about are hidden
       gsap.set(quoteRef.current, { opacity: 0, y: 50 });
       gsap.set(aboutRef.current, { opacity: 0, scale: 0.8, y: 100 });
 
+      // Adjust scroll distances for mobile
+      const scrollDistance = isMobile ? "800vh" : "1200vh";
+      
       // Create scroll trigger animation
       ScrollTrigger.create({
         trigger: document.body,
         start: "top top",
-        end: "1200vh top", // Extended much more for longer quote display
+        end: `${scrollDistance} top`,
+        // Reduce refresh rate on mobile for better performance
+        refreshPriority: isMobile ? -1 : 0,
         onUpdate: (self) => {
           const progress = self.progress;
           
@@ -84,14 +113,14 @@ export default function Home() {
             // Keep hero fully visible
             gsap.to(heroRef.current, {
               opacity: 1,
-              duration: 0.3,
+              duration: isMobile ? 0.2 : 0.3,
               ease: "power2.out"
             });
             
             // Keep scroll indicator visible
             gsap.to(scrollIndicatorRef.current, {
               opacity: 1,
-              duration: 0.3,
+              duration: isMobile ? 0.2 : 0.3,
               ease: "power2.out"
             });
           }
@@ -108,7 +137,7 @@ export default function Home() {
             // Fade out hero section
             gsap.to(heroRef.current, {
               opacity: 1 - phase2Progress,
-              duration: 0.5,
+              duration: isMobile ? 0.3 : 0.5,
               ease: "power2.out"
             });
             
@@ -116,14 +145,14 @@ export default function Home() {
             gsap.to(quoteRef.current, {
               opacity: phase2Progress,
               y: 50 - (phase2Progress * 50),
-              duration: 0.7,
+              duration: isMobile ? 0.5 : 0.7,
               ease: "power2.out"
             });
             
             // Fade out scroll indicator
             gsap.to(scrollIndicatorRef.current, {
               opacity: 1 - phase2Progress,
-              duration: 0.7,
+              duration: isMobile ? 0.5 : 0.7,
               ease: "power2.out"
             });
           }
@@ -141,7 +170,7 @@ export default function Home() {
               scale: 1,
               rotationY: 0,
               filter: 'blur(0px)',
-              duration: 0.3,
+              duration: isMobile ? 0.2 : 0.3,
               ease: "power2.out"
             });
           }
@@ -162,10 +191,10 @@ export default function Home() {
               
               gsap.to(quoteRef.current, {
                 opacity: 1 - engulfProgress,
-                scale: 1 + (engulfProgress * 2), // Grows larger
-                rotationY: engulfProgress * 180, // Flips
-                filter: `blur(${engulfProgress * 20}px)`,
-                duration: 0.8,
+                scale: 1 + (engulfProgress * (isMobile ? 1.5 : 2)), // Reduced scale on mobile
+                rotationY: engulfProgress * 180,
+                filter: `blur(${engulfProgress * (isMobile ? 15 : 20)}px)`, // Reduced blur on mobile
+                duration: isMobile ? 0.6 : 0.8,
                 ease: "power3.out"
               });
             }
@@ -183,7 +212,7 @@ export default function Home() {
                 opacity: revealProgress,
                 scale: 0.8 + (revealProgress * 0.2),
                 y: 100 - (revealProgress * 100),
-                duration: 1.2,
+                duration: isMobile ? 1.0 : 1.2,
                 ease: "power2.out"
               });
             }
@@ -193,7 +222,7 @@ export default function Home() {
     });
 
     return () => ctx.revert();
-  }, []);
+  }, [isMobile]); // Add isMobile dependency
 
   const handleDismissToast = () => {
     setShowToast(false);
@@ -215,24 +244,29 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Fluid Water Motion Background */}
+        {/* Fluid Water Motion Background - Optimized for Mobile */}
         <div
           className="fixed inset-0 z-0 pointer-events-none"
-          style={{ filter: 'blur(80px)', opacity: 0.6 }}
+          style={{ 
+            filter: isMobile ? 'blur(60px)' : 'blur(80px)', 
+            opacity: isMobile ? 0.4 : 0.6 
+          }}
         >
           {/* Mouse-following blob - Large oval */}
           <div
             ref={mouseBlobRef}
             className="absolute bg-gradient-to-br from-indigo-400 via-indigo-500 to-purple-600"
             style={{
-              width: '480px',
-              height: '300px',
+              width: isMobile ? '320px' : '480px',
+              height: isMobile ? '200px' : '300px',
               left: `${mousePos.x * 100}%`,
               top: `${mousePos.y * 100}%`,
               transform: 'translate(-50%, -50%)',
               borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
               willChange: 'transform, left, top',
-              boxShadow: '0 0 60px rgba(99, 102, 241, 0.3), 0 0 120px rgba(99, 102, 241, 0.1)',
+              boxShadow: isMobile 
+                ? '0 0 40px rgba(99, 102, 241, 0.2), 0 0 80px rgba(99, 102, 241, 0.05)'
+                : '0 0 60px rgba(99, 102, 241, 0.3), 0 0 120px rgba(99, 102, 241, 0.1)',
               filter: 'blur(1px)',
             }}
           />
@@ -241,43 +275,51 @@ export default function Home() {
           <div 
             className="absolute bg-gradient-to-br from-purple-400 via-purple-500 to-indigo-600 animate-blob1"
             style={{
-              width: '620px',
-              height: '380px',
+              width: isMobile ? '420px' : '620px',
+              height: isMobile ? '260px' : '380px',
               borderRadius: '70% 30% 60% 40% / 50% 70% 30% 50%',
-              boxShadow: '0 0 40px rgba(147, 51, 234, 0.2)',
+              boxShadow: isMobile 
+                ? '0 0 25px rgba(147, 51, 234, 0.15)'
+                : '0 0 40px rgba(147, 51, 234, 0.2)',
             }}
           />
 
-          {/* Animated blob 2 - Medium teardrop */}
+          {/* Animated blob 2 - Medium teardrop - Hide on small mobile */}
           <div 
-            className="absolute bg-gradient-to-br from-indigo-300 via-indigo-400 to-purple-500 animate-blob2"
+            className={`absolute bg-gradient-to-br from-indigo-300 via-indigo-400 to-purple-500 animate-blob2 ${isMobile ? 'hidden sm:block' : ''}`}
             style={{
-              width: '400px',
-              height: '520px',
+              width: isMobile ? '280px' : '400px',
+              height: isMobile ? '360px' : '520px',
               borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-              boxShadow: '0 0 35px rgba(129, 140, 248, 0.25)',
+              boxShadow: isMobile 
+                ? '0 0 20px rgba(129, 140, 248, 0.2)'
+                : '0 0 35px rgba(129, 140, 248, 0.25)',
             }}
           />
           
-          {/* Animated blob 3 - Small round */}
-          <div 
-            className="absolute bg-gradient-to-br from-purple-300 via-purple-400 to-indigo-500 animate-blob3"
-            style={{
-              width: '260px',
-              height: '260px',
-              borderRadius: '40% 60% 70% 30% / 40% 50% 50% 60%',
-              boxShadow: '0 0 30px rgba(196, 181, 253, 0.3)',
-            }}
-          />
+          {/* Animated blob 3 - Small round - Hide on mobile */}
+          {!isMobile && (
+            <div 
+              className="absolute bg-gradient-to-br from-purple-300 via-purple-400 to-indigo-500 animate-blob3"
+              style={{
+                width: '260px',
+                height: '260px',
+                borderRadius: '40% 60% 70% 30% / 40% 50% 50% 60%',
+                boxShadow: '0 0 30px rgba(196, 181, 253, 0.3)',
+              }}
+            />
+          )}
 
-          {/* Animated blob 4 - Extra large organic */}
+          {/* Animated blob 4 - Extra large organic - Reduced size on mobile */}
           <div 
             className="absolute bg-gradient-to-br from-violet-400 via-violet-500 to-purple-600 animate-blob4"
             style={{
-              width: '720px',
-              height: '430px',
+              width: isMobile ? '520px' : '720px',
+              height: isMobile ? '310px' : '430px',
               borderRadius: '80% 20% 50% 50% / 30% 80% 20% 70%',
-              boxShadow: '0 0 50px rgba(139, 92, 246, 0.2)',
+              boxShadow: isMobile 
+                ? '0 0 35px rgba(139, 92, 246, 0.15)'
+                : '0 0 50px rgba(139, 92, 246, 0.2)',
             }}
           />
         </div>
@@ -350,17 +392,34 @@ export default function Home() {
             50% { transform: translate(15vw, 45vh) scale(1.2) rotate(80deg); }
             75% { transform: translate(85vw, 65vh) scale(0.98) rotate(120deg); }
           }
+          
+          /* Mobile-optimized animations */
+          @media (max-width: 768px) {
+            @keyframes blob1 {
+              0%, 100% { transform: translate(20vw, 30vh) scale(0.9) rotate(0deg); }
+              50% { transform: translate(60vw, 70vh) scale(1.0) rotate(180deg); }
+            }
+            @keyframes blob2 {
+              0%, 100% { transform: translate(70vw, 60vh) scale(0.8) rotate(0deg); }
+              50% { transform: translate(30vw, 40vh) scale(1.1) rotate(180deg); }
+            }
+            @keyframes blob4 {
+              0%, 100% { transform: translate(40vw, 80vh) scale(0.9) rotate(0deg); }
+              50% { transform: translate(80vw, 20vh) scale(1.0) rotate(180deg); }
+            }
+          }
+          
           .animate-blob1 {
-            animation: blob1 28s ease-in-out infinite;
+            animation: blob1 ${isMobile ? '20s' : '28s'} ease-in-out infinite;
           }
           .animate-blob2 {
-            animation: blob2 32s ease-in-out infinite alternate;
+            animation: blob2 ${isMobile ? '25s' : '32s'} ease-in-out infinite alternate;
           }
           .animate-blob3 {
             animation: blob3 24s ease-in-out infinite;
           }
           .animate-blob4 {
-            animation: blob4 36s ease-in-out infinite alternate;
+            animation: blob4 ${isMobile ? '30s' : '36s'} ease-in-out infinite alternate;
           }
         `}</style>
         
@@ -373,14 +432,14 @@ export default function Home() {
           <div className="w-full flex flex-col items-center justify-center">
             {/* Main text */}
             <div className="text-center relative">
-              <h1 className="text-3xl md:text-7xl lg:text-8xl font-light text-white leading-tight tracking-wide mb-2 opacity-60 relative z-10">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-light text-white leading-tight tracking-wide mb-2 opacity-60 relative z-10">
                 <span className="font-light">I'm </span>
                 <span className="font-bold font-['Outfit']">Aman</span>
               </h1>
               {/* Bangera in elegant script - overlapping */}
-              <div className="relative -mt-4 md:-mt-8 lg:-mt-12">
+              <div className="relative -mt-1 sm:-mt-2 md:-mt-6 lg:-mt-10">
                 <span 
-                  className="text-4xl md:text-8xl lg:text-9xl block relative z-20 shiny-text"
+                  className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl block relative z-20 shiny-text"
                   style={{ 
                     fontFamily: "'Qwigley', cursive",
                     letterSpacing: '0.05em',
@@ -420,15 +479,20 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Quote Section - appears on scroll */}
-        <div ref={quoteRef} className="fixed inset-0 z-15 flex items-center justify-center pointer-events-none">
-          <div className="font-black text-white text-center leading-tight tracking-tight" style={{fontSize: '12rem'}}>
+        {/* Quote Section - appears on scroll - Mobile Optimized */}
+        <div ref={quoteRef} className="fixed inset-0 z-15 flex items-center justify-center pointer-events-none px-4">
+          <div 
+            className="font-black text-white text-center leading-tight tracking-tight"
+            style={{
+              fontSize: isMobile ? '2.5rem' : '12rem'
+            }}
+          >
             <TextPressure 
               text="Or am I?" 
               textColor="#FFFFFF"
               weight={true}
               scale={true}
-              minFontSize={120}
+              minFontSize={isMobile ? 40 : 120}
             />
           </div>
         </div>

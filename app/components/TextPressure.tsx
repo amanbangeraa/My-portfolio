@@ -45,6 +45,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
   const [fontSize, setFontSize] = useState(minFontSize);
   const [scaleY, setScaleY] = useState(1);
   const [lineHeight, setLineHeight] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
 
   const chars = text.split('');
 
@@ -55,6 +56,13 @@ const TextPressure: React.FC<TextPressureProps> = ({
   };
 
   useEffect(() => {
+    // Detect mobile device
+    const checkIsMobile = () => {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+             window.innerWidth <= 768;
+    };
+    setIsMobile(checkIsMobile());
+
     const handleMouseMove = (e: MouseEvent) => {
       cursorRef.current.x = e.clientX;
       cursorRef.current.y = e.clientY;
@@ -65,7 +73,9 @@ const TextPressure: React.FC<TextPressureProps> = ({
       cursorRef.current.y = t.clientY;
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    if (!isMobile) {
+      window.addEventListener('mousemove', handleMouseMove);
+    }
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
 
     if (containerRef.current) {
@@ -80,7 +90,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
     };
-  }, []);
+  }, [isMobile]);
 
   const setSize = () => {
     if (!containerRef.current || !titleRef.current) return;
@@ -115,8 +125,10 @@ const TextPressure: React.FC<TextPressureProps> = ({
   useEffect(() => {
     let rafId: number;
     const animate = () => {
-      mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / 15;
-      mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 15;
+      // Reduced animation frequency on mobile for better performance
+      const ease = isMobile ? 25 : 15;
+      mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / ease;
+      mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / ease;
 
       if (titleRef.current) {
         const titleRect = titleRef.current.getBoundingClientRect();
@@ -138,8 +150,12 @@ const TextPressure: React.FC<TextPressureProps> = ({
             return Math.max(minVal, val + minVal);
           };
 
-          const wdth = width ? Math.floor(getAttr(d, 75, 125)) : 100;
-          const wght = weight ? Math.floor(getAttr(d, 300, 900)) : 400;
+          // Reduce animation range on mobile for better performance
+          const wdthRange = isMobile ? [85, 115] : [75, 125];
+          const wghtRange = isMobile ? [400, 700] : [300, 900];
+
+          const wdth = width ? Math.floor(getAttr(d, wdthRange[0], wdthRange[1])) : 100;
+          const wght = weight ? Math.floor(getAttr(d, wghtRange[0], wghtRange[1])) : 400;
           const italVal = italic ? getAttr(d, 0, 1).toFixed(2) : 0;
           const alphaVal = alpha ? getAttr(d, 0, 1).toFixed(2) : 1;
 
@@ -154,7 +170,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
 
     animate();
     return () => cancelAnimationFrame(rafId);
-  }, [width, weight, italic, alpha, chars.length]);
+  }, [width, weight, italic, alpha, chars.length, isMobile]);
 
   const dynamicClassName = [className, flex ? 'flex' : '', stroke ? 'stroke' : '']
     .filter(Boolean)
